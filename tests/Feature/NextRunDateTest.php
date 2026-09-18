@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Studio\Totem\Console\Commands\ListSchedule;
 use Studio\Totem\Task;
@@ -31,7 +32,20 @@ class NextRunDateTest extends TestCase
 
     public function test_next_run_date_is_null_for_an_impossible_expression(): void
     {
+        Log::shouldReceive('warning')->never();
+
         $this->assertNull(Totem::nextRunDate(self::IMPOSSIBLE));
+    }
+
+    public function test_next_run_date_is_null_for_a_nearest_weekday_the_month_cannot_hold(): void
+    {
+        Carbon::setTestNow('2029-02-10 00:00:00');
+
+        Log::shouldReceive('warning')
+            ->once()
+            ->withArgs(fn (string $message) => str_contains($message, '0 0 31W * *'));
+
+        $this->assertNull(Totem::nextRunDate('0 0 31W * *', Carbon::now()));
     }
 
     public function test_next_run_date_still_rejects_a_malformed_expression(): void

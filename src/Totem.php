@@ -89,11 +89,14 @@ class Totem
     }
 
     /**
-     * Resolve the next date a cron expression matches, or null when it never matches.
+     * Resolve the next date a cron expression matches, or null when the parser cannot find one.
      *
      * The parser searches a bounded window of candidate dates and throws a
-     * RuntimeException for an expression no calendar date satisfies, such as
-     * `0 0 31 2 *`. Surfaces that display a next run treat that as "never".
+     * RuntimeException when that search fails. That covers an expression no
+     * calendar date satisfies, such as `0 0 31 2 *`, and a nearest-weekday
+     * day-of-month (`31W`) evaluated in a month too short to hold it. The
+     * parser's own getMultipleRunDates() treats the same exception as "no
+     * dates", and surfaces that display a next run render it as "Never".
      * A malformed expression still raises its InvalidArgumentException.
      */
     public static function nextRunDate(string $expression, DateTimeInterface|string $from = 'now', ?string $timezone = null): ?Carbon
@@ -101,6 +104,10 @@ class Totem
         try {
             return Carbon::instance((new CronExpression($expression))->getNextRunDate($from, 0, false, $timezone));
         } catch (RuntimeException $e) {
+            if ($e->getMessage() !== 'Impossible CRON expression') {
+                logger()->warning('Totem: could not resolve the next run date for ['.$expression.']: '.$e->getMessage());
+            }
+
             return null;
         }
     }
