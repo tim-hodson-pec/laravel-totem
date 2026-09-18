@@ -2,12 +2,16 @@
 
 namespace Studio\Totem;
 
+use Carbon\Carbon;
 use Closure;
+use Cron\CronExpression;
+use DateTimeInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Throwable;
 
@@ -82,6 +86,23 @@ class Totem
 
             return $name;
         });
+    }
+
+    /**
+     * Resolve the next date a cron expression matches, or null when it never matches.
+     *
+     * The parser searches a bounded window of candidate dates and throws a
+     * RuntimeException for an expression no calendar date satisfies, such as
+     * `0 0 31 2 *`. Surfaces that display a next run treat that as "never".
+     * A malformed expression still raises its InvalidArgumentException.
+     */
+    public static function nextRunDate(string $expression, DateTimeInterface|string $from = 'now', ?string $timezone = null): ?Carbon
+    {
+        try {
+            return Carbon::instance((new CronExpression($expression))->getNextRunDate($from, 0, false, $timezone));
+        } catch (RuntimeException $e) {
+            return null;
+        }
     }
 
     public static function isEnabled(): bool

@@ -4,6 +4,12 @@ This project follows [Semantic Versioning](CONTRIBUTING.md).
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- A task whose cron expression never matches a calendar date (for example `0 0 31 2 *`) no longer breaks the task list, the task view, the JSON export, or `schedule:list`. The parser throws `RuntimeException('Impossible CRON expression')` after a bounded search; `Task::$upcoming` is now `null` for such a task and every surface renders it as `Never`. The scheduler itself was never affected, since it matches the current minute rather than searching forward. `Totem::nextRunDate()` is the shared helper. (PR #____)
+
 ## v12.0.2 - 04/21/2026
 
 ### Fixed
