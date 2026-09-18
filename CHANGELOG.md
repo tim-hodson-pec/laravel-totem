@@ -14,7 +14,7 @@ This project follows [Semantic Versioning](CONTRIBUTING.md).
 
 ### Fixed
 
-- Empty output popup on the task-view page. The `<task-output>` Vue component received an empty `:output` prop because `@json()` produced a JSON literal whose outer `"` delimiters collided with the HTML attribute's own `"` wrappers, making the rendered HTML malformed. Replaced with `Js::from()`, Laravel's purpose-built helper for embedding JS expressions inside HTML attributes. (PR #419)
+- Empty output popup on the task-view page. The `<task-output>` Vue component received an empty `:output` prop because `@json()` produced a JSON literal whose outer `"` delimiters collided with the HTML attribute's own `"` wrappers, making the rendered HTML malformed. Replaced with `Js::from()`, Laravel's purpose-built helper for embedding JS expressions inside HTML attributes. (PR #415)
 
 ## v11.0.0 - 03/27/2024
 
